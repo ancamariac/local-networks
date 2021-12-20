@@ -1,0 +1,281 @@
+==================== SWITCH - STATIE ====================================
+
+PINK:
+
+PSW4: 
+en
+conf t
+vlan 90
+interface f0/19
+switchport mode access 
+sw acc vlan 90
+vlan 11
+interface f0/11
+switchport mode access 
+sw acc vlan 11
+
+PSW3: 
+en
+conf t
+vlan 11
+interface f0/11
+switchport mode access 
+sw acc vlan 11
+vlan 90
+interface f0/4
+switchport mode access 
+sw acc vlan 90
+
+=========================================================
+GREEN:
+
+GSW2: 
+en
+conf t
+vlan 168
+interface f0/2
+switchport mode access 
+sw acc vlan 168
+vlan 186
+interface f0/1
+switchport mode access 
+sw acc vlan 186
+
+GSW3: 
+en
+conf t
+vlan 168
+interface f0/2
+switchport mode access 
+sw acc vlan 168
+vlan 186
+interface f0/1
+switchport mode access 
+sw acc vlan 186
+
+=========================================================
+
+YELLOW:
+
+YSW1: 
+en
+conf t
+vlan 214
+interface f0/24
+switchport mode access 
+sw acc vlan 214
+vlan 150
+interface f0/23
+switchport mode access 
+sw acc vlan 150
+
+YSW2: 
+en
+conf t
+vlan 214
+interface f0/24
+switchport mode access 
+sw acc vlan 214
+vlan 150
+interface f0/23
+switchport mode access 
+sw acc vlan 150
+
+=========================================================
+
+BLUE:
+
+BSW1: 
+en
+conf t
+vlan 216
+interface f0/3
+switchport mode access 
+sw acc vlan 216
+
+BSW2: 
+en
+conf t
+vlan 220
+interface range f0/1,f0/2 
+switchport mode access 
+sw acc vlan 220
+
+BSW3: 
+en
+conf t
+vlan 40
+interface range f0/1,f0/2 
+switchport mode access 
+sw acc vlan 40
+
+
+==================== SWITCH - SWITCH ====================================
+
+GREEN:
+
+GSW2:
+en
+conf t
+interface f0/24
+switchport mode trunk
+sw trunk allowed vlan 186,168
+sw trunk native vlan 186 
+
+GSW3:
+en
+conf t
+interface f0/23
+switchport mode trunk
+sw trunk allowed vlan 186,168
+sw trunk native vlan 168
+
+GSW1:
+en
+conf t
+vlan 186
+vlan 168
+interface f0/23
+switchport mode trunk
+sw trunk allowed vlan 186,168
+sw trunk native vlan 168
+interface f0/24
+switchport mode trunk
+sw trunk allowed vlan 186,168
+sw trunk native vlan 186 
+
+=============================================
+
+PINK:
+
+PSW4:
+en
+conf t
+interface range g0/1,g0/2
+switchport mode trunk
+sw trunk allowed vlan 90,11
+
+PSW3:
+en
+conf t
+interface range g0/1,g0/2
+switchport mode trunk
+sw trunk allowed vlan 90,11
+
+PSW1 & PSW2:
+en
+conf t
+vlan 90
+vlan 11
+interface range g0/1,g0/2
+switchport mode trunk
+sw trunk allowed vlan 90,11
+
+===============================================
+
+YELLOW:
+
+YSW1 & YSW2:
+en
+conf t
+interface range g0/1,g0/2
+switchport mode trunk
+sw trunk allowed vlan 150,214
+
+===============================================
+
+BLUE:
+
+BSW1:
+en
+conf t
+vlan 40
+vlan 220
+interface range f0/2,g0/1
+switchport mode trunk
+sw trunk allowed vlan 220,40,216
+
+BSW2:
+en
+conf t
+vlan 40
+vlan 216
+interface range f0/3,g0/2
+switchport mode trunk
+sw trunk allowed vlan 220,40,216
+
+BSW3:
+en
+conf t
+vlan 216
+vlan 220
+interface range g0/2,g0/1
+switchport mode trunk
+sw trunk allowed vlan 220,40,216
+
+==================== SWITCH - RUTER ====================================
+
+GREEN:
+
+GSW1:
+en
+conf t
+interface g0/1
+switchport mode trunk
+sw trunk allowed vlan 186,168
+
+=====================================
+
+BLUE:
+
+BSW1:
+en
+conf t
+interface f0/1
+switchport mode trunk
+sw trunk allowed vlan 40,220,216
+
+======================================
+PINK
+
+PSW1:
+en
+conf t
+interface f0/1
+switchport mode access
+sw acc vlan 11
+
+PSW2:
+en
+conf t
+interface f0/1
+switchport mode access
+sw acc vlan 90
+
+==========================================
+
+YELLOW:
+
+YSW2:
+en
+conf t
+interface f0/1
+switchport mode access
+sw acc vlan 150
+
+YSW1:
+en
+conf t
+interface f0/1
+switchport mode access
+sw acc vlan 214
+
+PORNIRE INTERFETE pe rutere:
+en
+conf t
+int f...
+no sh
+
+
+
+
