@@ -1,0 +1,61 @@
+A: 27.32.3.1
+B: 27.32.4.1
+C: 27.32.6.1
+D: 27.32.6.193
+E: 27.32.0.1
+F: 27.32.6.129
+G: 27.32.1.1
+I: 27.32.5.1
+H: 27.32.2.1
+
+GREEN:
+en 
+conf t
+int f0/0
+no sh
+int f0/0.186
+encapsulation dot1Q 186
+ip add 27.32.3.1 255.255.255.0
+int f0/0.168
+encapsulation dot1Q 168
+ip add 27.32.4.1 255.255.255.0
+
+BLUE:
+en 
+conf t
+int f0/0
+no sh
+int f0/0.216
+encapsulation dot1Q 216
+ip add 27.32.1.1 255.255.255.0
+int f0/0.220
+encapsulation dot1Q 220
+ip add 27.32.0.1 255.255.255.0
+int f0/0.40
+encapsulation dot1Q 40
+ip add 27.32.6.129 255.255.255.192
+
+PINK:
+en 
+conf t
+int f0/0
+ip add 27.32.6.193 255.255.255.240
+no sh
+int f0/1
+ip add 27.32.6.1 255.255.255.128
+no sh
+
+YELLOW:
+YR1:
+en 
+conf t
+int f0/0
+ip add 27.32.5.1 255.255.255.0
+no sh
+
+YR2:
+en 
+conf t
+int f0/0
+ip add 27.32.2.1 255.255.255.0
+no sh
