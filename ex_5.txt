@@ -1,0 +1,86 @@
+XR1=91, XR2=276
+
+XR1: 27.32.6.208 255.255.255.248
+XR2: 27.32.6.216 255.255.255.252
+
+GR1: 27.32.6.209
+BR1: 27.32.6.210
+YR1: 27.32.6.211
+YR2: 27.32.6.212
+
+YR1: 27.32.6.217
+PR1: 27.32.6.218
+
+GR1:
+en
+conf t
+int f0/1
+ip add 27.32.6.209 255.255.255.248
+no sh
+
+BR1:
+en
+conf t
+int f0/1
+ip add 27.32.6.210 255.255.255.248
+no sh
+
+PR1:
+en
+conf t
+int f1/0
+ip add 27.32.6.218 255.255.255.252
+no sh
+
+YR2:
+en
+conf t
+int f0/1
+ip add 27.32.6.212 255.255.255.248
+no sh
+
+YR1:
+en 
+conf t 	
+int f0/1
+no sh
+int f0/1.91
+encapsulation dot1Q 91
+ip add 27.32.6.211 255.255.255.248
+int f0/1.276
+encapsulation dot1Q 276
+ip add 27.32.6.217 255.255.255.252
+
+XSW1:
+en
+conf t
+int g0/1
+switchport mode access
+switchport access vlan 276
+int g1/1
+switchport mode access
+switchport access vlan 91
+int g2/1
+switchport mode trunk
+switchport trunk allowed vlan 91,276
+int range f4/1,f5/1
+switchport mode trunk
+switchport trunk allowed vlan 91,276
+
+XS2:
+en
+conf t
+int range g0/1,g1/1
+switchport mode access
+switchport access vlan 91
+int range f4/1,f5/1
+switchport mode trunk
+switchport trunk allowed vlan 91,276
+
+ip route <Retea_dest> <MSK_dest> <next_hop>
+PR1:
+ip route 27.32.6.208 255.255.255.248 27.32.6.217
+YR2, GR1, BR1:
+ip route 27.32.6.216 255.255.255.252 27.32.6.211
+
+
