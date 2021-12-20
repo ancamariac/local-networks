@@ -1,0 +1,14 @@
+PSW1:
+en
+conf t
+span vlan 90 prio 8192
+
+XSW1, XSW2:
+en
+conf t
+int f4/1
+spanning-tree vlan 91 port-prio 64
+int f5/1
+spanning-tree vlan 276 port-prio 64
+
+
