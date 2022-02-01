@@ -1,0 +1,359 @@
+Conectare openstack
+ssh anca_maria.ciuciu@fep.grid.pub.ro
+ssh -i ~/.ssh/openstack.key student@10.9.3.106
+
+iptables -L -v
+
+student@host:~$ sudo t2check --save
+[anca_maria.ciuciu@fep7-1 ~]$ scp -i .ssh/openstack.key student@10.9.3.106:/home/student/tema2-exported.cz .
+HayLin@HayLin MINGW64 ~/Desktop/Tema2RL$ scp anca_maria.ciuciu@fep.grid.pub.ro:tema2-exported.cz .
+
+
+ /C:/Users/Media_PC/Desktop
+
+Verificare checker
+root@host:/# cd root
+root@host:~# nano tema2.txt
+
+USERNAME=anca_maria.ciuciu
+A=82
+B=186
+C=168
+D=90
+E=11
+F=220
+G=40
+H=216
+I=214
+J=150
+K=243
+
+t2check
+
+Topologie
+Rețeaua red: 10.44.82.0/27
+Rețeaua green: 172.18.186.64/28
+Rețeaua blue: 172.18.186.80/30
+
+1. (10 puncte) Adresare IPv4
+Configurați cu adrese IP toate legăturile din topologie, astfel:
+Rețeaua red: 10.44.82.0/27
+Rețeaua green: 172.18.186.64/28
+Rețeaua blue: 172.18.186.80/30
+Sistemul host va avea prima adresă asignabilă, iar containerul, pe cea de-a doua.
+Configurați rutarea IPv4 pentru a permite comunicarea între toate sistemele. 
+Sistemele red, green și blue vor avea ruta default prin sistemul host.
+
+root@host:~# ip address add 10.44.82.1/27 dev veth-red
+root@red:~# ip address add 10.44.82.2/27 dev eth0
+root@host:~# ip link set dev veth-red up
+root@red:~# ip link set dev eth0 up
+root@host:~# ping 10.44.82.2
+
+root@host:~# ip address add 172.18.186.65/28 dev veth-green
+root@green:~# ip address add 172.18.186.66/28 dev eth0
+root@host:~# ip link set dev veth-green up
+root@green:~# ip link set dev eth0 up
+root@host:~# ping 172.18.186.66
+
+root@host:~# ip address add 172.18.186.81/30 dev veth-blue
+root@blue:~# ip address add 172.18.186.82/30 dev eth0
+root@host:~# ip link set dev veth-blue up
+root@blue:~# ip link set dev eth0 up
+root@host:~# ping 172.18.186.82
+
+// adaugare degault gateway
+root@red:~# ip route add default via 10.44.82.1         ip route show
+root@green:~# ip route add default via 172.18.186.65    ip route show
+root@blue:~# ip route add default via 172.18.186.81     ip route show
+
+// activare rutare pe host
+root@host:~# sysctl -w net.ipv4.ip_forward=1
+root@host:~# sysctl net.ipv4.ip_forward
+
+2. (10 puncte) Adresare IPv6
+Configurați adrese IPv6 pentru întreaga rețea astfel:
+Rețeaua red 2022:2:82:168::/64
+Rețeaua green 2022:3:186:90::/64
+Rețeaua blue 2022:4:186:11::/64
+Sistemul host va avea prima adresă asignabilă,
+iar containerul, pe cea de-a doua.
+Configurați rutarea IPv6 pentru a permite comunicarea între toate sistemele. 
+Sistemele red, green și blue vor avea ruta default prin sistemul host.
+
+# HOST
+root@host:~# ip -6 address add 2022:2:82:168::1/64 dev veth-red
+root@host:~# ip link set dev veth-red up
+root@host:~# ip -6 address add 2022:3:186:90::1/64 dev veth-green
+root@host:~# ip link set dev veth-green up
+root@host:~# ip -6 address add 2022:4:186:11::1/64 dev veth-blue
+root@host:~# ip link set dev veth-blue up
+root@host:~# sysctl -w net.ipv6.conf.all.forwarding=1
+root@host:~# ip -6 address sh dev veth-red
+root@host:~# ip -6 address sh dev veth-green
+root@host:~# ip -6 address sh dev veth-blue
+
+# RED
+root@red:~# ip -6 address add 2022:2:82:168::2/64 dev eth0
+root@red:~# ip link set dev eth0 up
+root@red:~# ip route add default via 2022:2:82:168::1
+root@red:~# ip -6 address sh dev eth0
+
+# GREEN
+root@green:~# ip -6 address add 2022:3:186:90::2/64 dev eth0
+root@green:~# ip link set dev eth0 up
+root@green:~# ip route add default via 2022:3:186:90::1
+root@green:~# ip -6 address sh dev eth0
+
+# BLUE
+root@blue:~# ip -6 address add 2022:4:186:11::2/64 dev eth0
+root@blue:~# ip link set dev eth0 up
+root@blue:~# ip route add default via 2022:4:186:11::1
+root@blue:~# ip -6 address sh dev eth0
+
+=== Configurare persistenta ===
+
+# FOR RED
+nano /etc/network/interfaces.d/red.conf
+auto eth0
+iface eth0 inet static
+address 10.44.82.2/27
+gateway 10.44.82.1
+
+iface eth0 inet6 static
+address 2022:2:82:168::2/64
+gateway 2022:2:82:168::1 
+
+# FOR GREEN
+nano /etc/network/interfaces.d/green.conf
+auto eth0
+iface eth0 inet static
+address 172.18.186.66/28
+gateway 172.18.186.65
+
+iface eth0 inet6 static
+address 2022:3:186:90::2/64
+gateway 2022:3:186:90::1
+
+# FOR BLUE
+nano /etc/network/interfaces.d/blue.conf
+auto eth0
+iface eth0 inet static
+address 172.18.186.82/30
+gateway 172.18.186.81
+
+iface eth0 inet6 static
+address 2022:4:186:11::2/64
+gateway 2022:4:186:11::1
+
+# FOR HOST
+
+# uncomment 2 lines from 
+/etc/sysctl.conf 
+
+nano /etc/network/interfaces.d/containers.conf
+
+auto veth-red
+iface veth-red inet static
+address 10.44.82.1/27
+
+iface veth-red inet6 static
+address 2022:2:82:168::1/64
+
+auto veth-green
+iface veth-green inet static
+address 172.18.186.65/28
+
+iface veth-green inet6 static
+address 2022:3:186:90::1/64
+
+auto veth-blue
+iface veth-blue inet static
+address 172.18.186.81/30
+
+iface veth-blue inet6 static
+address 2022:4:186:11::1/64
+
+
+3. (5 puncte) Hosts
+Realizați configurațiile necesare astfel încât 
+echipamentele să poată fi accesate prin numele lor 
+(folosiți numele host, red, green, respectiv blue). 
+Adăugați intrări de hosts doar pentru adresele IPv4.
+
+# CONFIGURE NAMES: nano /etc/hosts
+Rețeaua red: 10.44.82.0/27
+Rețeaua green: 172.18.186.64/28
+Rețeaua blue: 172.18.186.80/30
+
+Rețeaua red 2022:2:82:168::2/64
+Rețeaua green 2022:3:186:90::2/64
+Rețeaua blue 2022:4:186:11::2/64
+
+# HOST
+# IPv4
+10.44.82.2 red
+172.18.186.66 green
+172.18.186.82 blue
+
+10.44.82.1 host
+172.18.186.65 host
+172.18.186.81 host
+
+#IPv6
+2022:2:82:168::2 red
+2022:3:186:90::2 green
+2022:4:186:11::2 blue
+
+# RED
+10.44.82.1 host
+
+# IPv4
+10.44.82.2      red
+172.18.186.66   green
+172.18.186.82   blue
+#IPv6
+2022:2:82:168::2 red
+2022:3:186:90::2 green
+2022:4:186:11::2 blue
+
+# GREEN
+172.18.186.65 host
+
+# IPv4
+10.44.82.2      red
+172.18.186.66   green
+172.18.186.82   blue
+#IPv6
+2022:2:82:168::2 red
+2022:3:186:90::2 green
+2022:4:186:11::2 blue
+
+# BLUE
+172.18.186.81 host
+
+# IPv4
+10.44.82.2      red
+172.18.186.66   green
+172.18.186.82   blue
+#IPv6
+2022:2:82:168::2 red
+2022:3:186:90::2 green
+2022:4:186:11::2 blue
+
+
+4. (5 puncte) Internet connectivity
+Realizați configurațiile necesare pentru 
+ca cele 3 containere sa aibă acces la Internet.
+Configurați sistemul host astfel încât să facă 
+translatarea doar pentru adresele IP configurate 
+static pe interfețele containerelor, 
+nu și pentru alte adrese din rețelele lor.
+
+Observație: adresa IP de pe eth0 a sistemului host 
+este asignată dinamic de către ISP, prin DHCP; 
+configurarea trebuie realizată astfel încât 
+conectivitatea la internet a containerelor să 
+nu depindă de această adresă IP.
+
+Rețeaua red: 10.44.82.2/27
+Rețeaua green: 172.18.186.66/28
+Rețeaua blue: 172.18.186.82/30
+
+iptables -t nat -A POSTROUTING -s 10.44.82.2 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 172.18.186.66 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 172.18.186.82 -o eth0 -j MASQUERADE
+
+iptables -t nat -L -n -v
+
+iptables-save > /etc/iptables/rules.v4
+sudo /sbin/iptables-save > /etc/iptables/rules.v4
+
+6. (10 puncte) Configurați NAT pe sistemul host astfel încât:
+Conexiunile pe porturile (21640), (21816), (18814), 
+să conducă la conectarea ssh pe sistemele blue, green respectiv red.
+Conectarea pe portul (13943) să conducă la conectarea 
+pe tracker-ul de pe sistemul green.
+
+blue ssh : 21640
+green ssh : 21816
+red ssh : 18814
+ssh port : 22
+
+root@green:~# netstat -a
+udp        0      0 0.0.0.0:8914            0.0.0.0:*  -  tracker
+
+tracker port : 13943
+
+# BLUE
+iptables -t nat -A PREROUTING -p tcp --dport 21640 -j DNAT --to-destination 172.18.186.82:22
+
+# GREEN
+iptables -t nat -A PREROUTING -p tcp --dport 21816 -j DNAT --to-destination 172.18.186.66:22
+
+# RED
+iptables -t nat -A PREROUTING -p tcp --dport 18814 -j DNAT --to-destination 10.44.82.2:22
+
+# TRACKER
+iptables -t nat -A PREROUTING -p udp --dport 13943 -j DNAT --to-destination 172.18.186.66:8914
+
+iptables-save > /etc/iptables/rules.v4
+sudo /sbin/iptables-save > /etc/iptables/rules.v4
+
+7. (10 puncte) Configurați filtrarea de pachete pe host astfel încât:
+- conexiunile SMTP inițiate de pe sistemul red să fie blocate (inclusiv către host!);
+iptables -A INPUT -p tcp -i veth-red -s 10.44.82.2 --dport 25 -j DROP
+
+- conexiunile către tracker-ul ce rulează pe sistemul green să nu fie permise de pe host
+iptables -A OUTPUT -p udp -s 172.18.186.65 -d 172.18.186.66 --dport 8914 -j DROP
+
+- blocați TOATE conexiunile trimise către blue, mai puțin protocoalele icmp, ssh și ftp.
+atenție: NU blocați conexiunile inițiate de blue sau răspunsurile de la acestea! folosiți reguli stateful;
+
+iptables -A FORWARD -p ICMP -d 172.18.186.82 -j ACCEPT
+iptables -A FORWARD -p tcp -d 172.18.186.82 --dport 21 -j ACCEPT
+iptables -A FORWARD -p tcp -d 172.18.186.82 --dport 22 -j ACCEPT
+iptables -A FORWARD -p tcp -d 172.18.186.82 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -p tcp -d 172.18.186.82 -m state --state NEW -j DROP
+
+8. (5 puncte) Configurați serviciul de SSH pe toate sistemele astfel încât:
+autentificarea cu utilizatorul student de pe oricare sistem să fie permisă pe toate celelate sisteme (tot în cadrul utilizatorului student) folosind chei publice;
+folosind alias-uri SSH să fie folosite comenzi simplificate pentru autenficarea pe sisteme:
+- ssh h să ducă către sistemul host cu utilizatorul student;
+- ssh r să ducă către sistemul red cu utilizatorul student;
+- ssh g să ducă către sistemul green cu utilizatorul student;
+- ssh b să ducă către sistemul blue cu utilizatorul student.
+
+~/.ssh/config
+
+Host h
+  HostName host
+  User student
+Host r
+  HostName red
+  User student
+Host g
+  HostName green
+  User student
+Host b
+  HostName blue
+  User student
+
+
+mkdir /home/student/.ssh
+ssh-keygen -t rsa
+
+10.
+wget -r -q -np -R "index.html*" --http-user ana --http-password face_ReLe http://host/.X/
+find . -name waldo.txt | xargs cat
+
+11. 
+echo $1 > file
+sha256sum ./rr.jpeg >> file
+mutt -s "Cumpara NFTuri cu RR" -a ./rr.jpeg -- contact@host <file
+
+12.
+
+iptables -I FORWARD 2 -p tcp -i veth-blue -s 172.18.186.82 -d 172.18.186.65 --dport 23 -j LOG --log-prefix "insecure-telnet: "
+iptables -A FORWARD -p tcp -i veth-blue -s 172.18.186.82 -d 172.18.186.65 --dport 23 -j DROP
+
